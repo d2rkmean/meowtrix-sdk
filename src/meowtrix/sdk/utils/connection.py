@@ -11,6 +11,9 @@ class EndpointType(enum.Enum):
     LOGIN = "_matrix/client/v3/login"
     SYNC = "_matrix/client/v3/sync"
 
+    def format(self, **kwargs) -> str:
+        return self.value.format(**kwargs)
+
 
 class RequestType(enum.Enum):
     GET = "GET"
