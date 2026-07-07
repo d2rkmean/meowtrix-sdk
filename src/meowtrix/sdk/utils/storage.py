@@ -1,5 +1,5 @@
 import aiosqlite
-from typing import Any
+
 
 class SQLiteStorage:
     def __init__(self, db_path: str = "bot_session.db") -> None:
@@ -31,9 +31,7 @@ class SQLiteStorage:
 
     async def get(self, key: str) -> str | None:
         async with aiosqlite.connect(self.db_path) as db:
-            async with db.execute(
-                "SELECT value FROM session_data WHERE key = ?", (key,)
-            ) as cursor:
+            async with db.execute("SELECT value FROM session_data WHERE key = ?", (key,)) as cursor:
                 row = await cursor.fetchone()
                 return row[0] if row else None
 

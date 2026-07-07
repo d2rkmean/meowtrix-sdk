@@ -11,7 +11,7 @@ class EndpointType(enum.Enum):
     LOGIN = "_matrix/client/v3/login"
     SYNC = "_matrix/client/v3/sync"
 
-    def format(self, **kwargs) -> str:
+    def format(self, **kwargs: dict[str, str]) -> str:
         return self.value.format(**kwargs)
 
 
@@ -91,17 +91,17 @@ async def request(
     json: dict[str, Any] | None = None,
     headers: dict[str, Any] | None = None,
     request_type: RequestType = RequestType.GET,
-    timeout: float | None = None,
+    timeout: float | None = None,  # noqa: ASYNC109
 ) -> dict[str, Any]:
     """Send an HTTP request to a Matrix server and return the parsed JSON response.
 
     Builds the request URL as ``https://{server}/{endpoint}`` and sends it
     using the specified HTTP method (`request_type`), along with any given
-    query parameters, JSON body, headers, and an optional request timeout. 
-    If the server responds with a status code other than 200, attempts to 
-    parse the response body as JSON and extract the `errcode` and `error` 
-    fields to raise a `MatrixRequestError`. If the error response body is 
-    not valid JSON, or does not contain the expected error fields, a 
+    query parameters, JSON body, headers, and an optional request timeout.
+    If the server responds with a status code other than 200, attempts to
+    parse the response body as JSON and extract the `errcode` and `error`
+    fields to raise a `MatrixRequestError`. If the error response body is
+    not valid JSON, or does not contain the expected error fields, a
     `MatrixRequestError` is also raised with an appropriate message.
 
     Args:
@@ -116,8 +116,8 @@ async def request(
             Defaults to None.
         request_type: The HTTP method to use for the request (GET, POST,
             etc.). Defaults to `RequestType.GET`.
-        timeout: The maximum time (in seconds) to wait for the request 
-            to complete. Can be a single float or None to inherit the 
+        timeout: The maximum time (in seconds) to wait for the request
+            to complete. Can be a single float or None to inherit the
             client's default timeout configuration. Defaults to None.
 
     Returns:
