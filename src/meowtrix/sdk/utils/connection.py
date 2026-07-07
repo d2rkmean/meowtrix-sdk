@@ -1,8 +1,14 @@
 import enum
 import logging
+from typing import Any
+
 import httpx
 
 logger = logging.getLogger("connection")
+
+
+class EndpointType(enum.Enum):
+    LOGIN = "_matrix/client/v3/login"
 
 
 class RequestType(enum.Enum):
@@ -15,6 +21,7 @@ class RequestType(enum.Enum):
 
 class ErrorCode(enum.Enum):
     """https://spec.matrix.org/v1.18/client-server-api/#common-error-codes"""
+
     M_BAD_JSON = "M_BAD_JSON"
     M_FORBIDDEN = "M_FORBIDDEN"
     M_LIMIT_EXCEEDED = "M_LIMIT_EXCEEDED"
@@ -52,9 +59,17 @@ class ErrorCode(enum.Enum):
     M_INVALID_USERNAME = "M_INVALID_USERNAME"
     M_INVALID_ROOM_STATE = "M_INVALID_ROOM_STATE"
 
+
 class MatrixRequestError(Exception):
     """https://spec.matrix.org/v1.18/client-server-api/#standard-error-response"""
-    def __init__(self, error_code: ErrorCode | str, description: str, status_code: int = 400, **kwargs):
+
+    def __init__(
+        self,
+        error_code: ErrorCode | str,
+        description: str,
+        status_code: int = 400,
+        **kwargs: dict[str, Any],
+    ) -> None:
         self.error_code = error_code
         self.description = description
         self.status_code = status_code
@@ -67,12 +82,12 @@ class MatrixRequestError(Exception):
 async def request(
     client: httpx.AsyncClient,
     server: str,
-    endpoint: str,
-    params: dict | None = None,
-    json: dict | None = None,
-    headers: dict | None = None,
+    endpoint: EndpointType,
+    params: dict[str, Any] | None = None,
+    json: dict[str, Any] | None = None,
+    headers: dict[str, Any] | None = None,
     request_type: RequestType = RequestType.GET,
-) -> dict:
+) -> dict[str, Any]:
     """Send an HTTP request to a Matrix server and return the parsed JSON response.
 
     Builds the request URL as ``https://{server}/{endpoint}`` and sends it
@@ -107,8 +122,8 @@ async def request(
             otherwise used as-is). Also raised if the error response body
             is not valid JSON or is missing the expected `errcode`/`error`
             fields."""
-    
-    url = f"https://{server}/{endpoint}"
+
+    url = f"https://{server}/{endpoint.value}"
     logger.debug(f"HTTP request: {url}")
 
     response = await client.request(
@@ -117,10 +132,12 @@ async def request(
 
     if response.status_code != 200:
         try:
-            data: dict = response.json()
+            data: dict[str, Any] = response.json()
         except ValueError:
             raise MatrixRequestError(
-                ErrorCode.M_UNKNOWN, f"Non-JSON error response: {response.text}", response.status_code
+                ErrorCode.M_UNKNOWN,
+                f"Non-JSON error response: {response.text}",
+                response.status_code,
             )
 
         raw_errcode = data.get("errcode")
@@ -131,11 +148,12 @@ async def request(
                 errcode = ErrorCode(raw_errcode)
             except ValueError:
                 errcode = raw_errcode
-            
+
             raise MatrixRequestError(errcode, error, response.status_code)
-            
+
         raise MatrixRequestError(
             ErrorCode.M_UNKNOWN, f"Unexpected error response: {data}", response.status_code
         )
 
-    return response.json()
+    output_json: dict[str, Any] = response.json()
+    return output_json
