@@ -9,6 +9,7 @@ logger = logging.getLogger("connection")
 
 class EndpointType(enum.Enum):
     LOGIN = "_matrix/client/v3/login"
+    SYNC = "_matrix/client/v3/sync"
 
 
 class RequestType(enum.Enum):
@@ -87,17 +88,18 @@ async def request(
     json: dict[str, Any] | None = None,
     headers: dict[str, Any] | None = None,
     request_type: RequestType = RequestType.GET,
+    timeout: float | None = None,
 ) -> dict[str, Any]:
     """Send an HTTP request to a Matrix server and return the parsed JSON response.
 
     Builds the request URL as ``https://{server}/{endpoint}`` and sends it
     using the specified HTTP method (`request_type`), along with any given
-    query parameters, JSON body, and headers. If the server responds with a
-    status code other than 200, attempts to parse the response body as JSON
-    and extract the `errcode` and `error` fields to raise a
-    `MatrixRequestError`. If the error response body is not valid JSON, or
-    does not contain the expected error fields, a `MatrixRequestError` is
-    also raised with an appropriate message.
+    query parameters, JSON body, headers, and an optional request timeout. 
+    If the server responds with a status code other than 200, attempts to 
+    parse the response body as JSON and extract the `errcode` and `error` 
+    fields to raise a `MatrixRequestError`. If the error response body is 
+    not valid JSON, or does not contain the expected error fields, a 
+    `MatrixRequestError` is also raised with an appropriate message.
 
     Args:
         client: The async HTTP client used to perform the request.
@@ -111,6 +113,9 @@ async def request(
             Defaults to None.
         request_type: The HTTP method to use for the request (GET, POST,
             etc.). Defaults to `RequestType.GET`.
+        timeout: The maximum time (in seconds) to wait for the request 
+            to complete. Can be a single float or None to inherit the 
+            client's default timeout configuration. Defaults to None.
 
     Returns:
         dict: The parsed JSON body of the successful response.
@@ -127,7 +132,7 @@ async def request(
     logger.debug(f"HTTP request: {url}")
 
     response = await client.request(
-        request_type.value, url, params=params, json=json, headers=headers
+        request_type.value, url, params=params, json=json, headers=headers, timeout=timeout
     )
 
     if response.status_code != 200:
