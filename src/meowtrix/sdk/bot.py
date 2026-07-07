@@ -23,6 +23,7 @@ class Bot:
         self.homeserver = homeserver
 
         self.filename = filename or f"{name}.session"
+        self.device_id: str | None = None
         self.client: AsyncClient = AsyncClient()
         self.storage: SQLiteStorage = SQLiteStorage(self.filename)
 
@@ -93,6 +94,7 @@ class Bot:
 
         device_id = data.get("device_id")
         if device_id:
+            self.device_id = device_id
             await self.storage.set("device_id", device_id)
 
         home_server = data.get("home_server")
