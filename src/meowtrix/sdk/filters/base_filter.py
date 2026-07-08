@@ -1,4 +1,5 @@
-from typing import Callable, Union
+from collections.abc import Callable
+from typing import Union
 
 from ..types.events.base_event import BaseEvent
 

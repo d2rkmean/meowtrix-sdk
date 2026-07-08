@@ -10,12 +10,12 @@ class InReplyTo:
 
 @dataclass
 class RelatesTo:
-    in_reply_to: Optional[InReplyTo] = None
-    rel_type: Optional[str] = None 
-    event_id: Optional[str] = None 
+    in_reply_to: InReplyTo | None = None
+    rel_type: str | None = None
+    event_id: str | None = None
 
     @classmethod
-    def from_dict(cls, data: Optional[dict[str, Any]]) -> Optional["RelatesTo"]:
+    def from_dict(cls, data: dict[str, Any] | None) -> Optional["RelatesTo"]:
         if not data:
             return None
 
@@ -45,7 +45,7 @@ class Mentions:
     room: bool = False
 
     @classmethod
-    def from_dict(cls, data: Optional[dict[str, Any]]) -> Optional["Mentions"]:
+    def from_dict(cls, data: dict[str, Any] | None) -> Optional["Mentions"]:
         if not data:
             return None
         return cls(user_ids=data.get("user_ids", []), room=data.get("room", False))

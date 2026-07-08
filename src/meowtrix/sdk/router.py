@@ -1,30 +1,29 @@
 import asyncio
-from typing import Awaitable, Callable, Optional, Type
+from collections.abc import Awaitable, Callable
 
-from .types.events import BaseEvent
-from .middleware import Middleware, NextMiddleware
 from .filters import FilterLike, apply_filters
+from .middleware import Middleware, NextMiddleware
+from .types.events import BaseEvent
 
 Handler = Callable[[BaseEvent], Awaitable[None]]
 
 
 class Router:
-    def __init__(self, name: Optional[str] = None) -> None:
+    def __init__(self, name: str | None = None) -> None:
         self.name = name or self.__class__.__name__
-        self._handlers: dict[Type[BaseEvent], list[tuple[Handler, list[FilterLike]]]] = {}
-        self._sub_routers: list["Router"] = []
+        self._handlers: dict[type[BaseEvent], list[tuple[Handler, list[FilterLike]]]] = {}
+        self._sub_routers: list[Router] = []
         self._middlewares: list[Middleware] = []
 
-    def on(
-        self, event_cls: Type[BaseEvent], *filters: FilterLike
-    ) -> Callable[[Handler], Handler]:
+    def on(self, event_cls: type[BaseEvent], *filters: FilterLike) -> Callable[[Handler], Handler]:
         def decorator(func: Handler) -> Handler:
             self._handlers.setdefault(event_cls, []).append((func, list(filters)))
             return func
+
         return decorator
 
     def add_handler(
-        self, event_cls: Type[BaseEvent], handler: Handler, *filters: FilterLike
+        self, event_cls: type[BaseEvent], handler: Handler, *filters: FilterLike
     ) -> None:
         self._handlers.setdefault(event_cls, []).append((handler, list(filters)))
 
@@ -77,4 +76,5 @@ class Router:
     def _wrap(mw: Middleware, next_call: NextMiddleware) -> NextMiddleware:
         async def wrapped(ev: BaseEvent) -> None:
             await mw(ev, next_call)
+
         return wrapped

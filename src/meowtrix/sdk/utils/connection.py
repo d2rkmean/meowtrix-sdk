@@ -6,7 +6,6 @@ import httpx
 
 logger = logging.getLogger("connection")
 
-import enum
 
 
 class EndpointType(enum.Enum):

@@ -1,21 +1,23 @@
 import asyncio
-from typing import Any, Awaitable, Callable, Type
+from collections.abc import Callable
+from logging import getLogger
+from typing import Any
 
 from .bot import Bot
-from .types.events import BaseEvent
-from .router import Router, Handler
-from .middleware import Middleware
 from .filters import FilterLike
-from logging import getLogger
+from .middleware import Middleware
+from .router import Handler, Router
+from .types.events import BaseEvent
 
 logger = getLogger("listener")
+
 
 class Listener:
     def __init__(self, bot: Bot | None = None) -> None:
         self.bots: list[Bot] = []
         self._root_router = Router(name="root")
         self._running = False
-        self._registered_events: set[Type[BaseEvent]] = set()
+        self._registered_events: set[type[BaseEvent]] = set()
         self._tasks: list[asyncio.Task] = []
 
         if bot is not None:
@@ -26,7 +28,7 @@ class Listener:
             raise ValueError(f"Bot {bot.name!r} is already added to this Listener")
         self.bots.append(bot)
 
-    def register_event(self, event_cls: Type[BaseEvent]) -> None:
+    def register_event(self, event_cls: type[BaseEvent]) -> None:
         if not issubclass(event_cls, BaseEvent):
             raise TypeError(f"{event_cls!r} must be a subclass of BaseEvent")
 
@@ -44,9 +46,7 @@ class Listener:
     def middleware(self, mw: Middleware) -> None:
         self._root_router.middleware(mw)
 
-    def on(
-        self, event_cls: Type[BaseEvent], *filters: FilterLike
-    ) -> Callable[[Handler], Handler]:
+    def on(self, event_cls: type[BaseEvent], *filters: FilterLike) -> Callable[[Handler], Handler]:
         self.register_event(event_cls)
         return self._root_router.on(event_cls, *filters)
 
@@ -59,7 +59,7 @@ class Listener:
             return
         logger.debug("Parsed event: %r", event)
         await self._root_router.dispatch(event)
-        
+
     async def _run_bot(self, bot: Bot, timeout: int) -> None:
         async for raw_event in bot.loop(timeout=timeout):
             if not self._running:

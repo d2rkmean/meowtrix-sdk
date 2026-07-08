@@ -1,7 +1,9 @@
-from dataclasses import dataclass, fields, asdict, is_dataclass, field, MISSING
-from typing import Any, ClassVar, Optional, TYPE_CHECKING
 from abc import ABC, abstractmethod
-from .relations import RelatesTo, Mentions
+from dataclasses import MISSING, asdict, dataclass, field, fields, is_dataclass
+from typing import TYPE_CHECKING, Any, ClassVar, Optional
+
+from .relations import Mentions, RelatesTo
+
 if TYPE_CHECKING:
     from ...bot import Bot
 
@@ -19,9 +21,9 @@ class BaseEvent(ABC):
     event_id: str | None = None
     sender_id: str | None = None
     bot: "Bot" = field(repr=False, compare=False, default=None)
-    event_type: Optional[str] = None
-    content: Optional[BaseContent] = None
-    raw: Optional[dict[str, Any]] = None
+    event_type: str | None = None
+    content: BaseContent | None = None
+    raw: dict[str, Any] | None = None
 
     _registry: ClassVar[list[type["BaseEvent"]]] = []
 
@@ -54,7 +56,7 @@ class BaseEvent(ABC):
                     return candidate.from_dict(data, bot)
             raise ValueError(f"No matching event class for data: {data}")
 
-        content_data = dict(data.get("content", {})) 
+        content_data = dict(data.get("content", {}))
         content_cls = cls.content_class()
         known_names = {f.name for f in fields(content_cls) if f.name != "extra"}
 
@@ -81,7 +83,8 @@ class BaseEvent(ABC):
         content_dict: dict[str, Any] = {}
         if is_dataclass(self.content):
             content_dict = {
-                k: v for k, v in asdict(self.content).items()
+                k: v
+                for k, v in asdict(self.content).items()
                 if k not in ("extra", "relates_to", "mentions") and v is not None
             }
             if self.content.relates_to:
@@ -93,13 +96,15 @@ class BaseEvent(ABC):
             content_dict = self.content
 
         result = dict(self.raw) if self.raw else {}
-        result.update({
-            "type": self.event_type,
-            "room_id": self.room_id,
-            "event_id": self.event_id,
-            "sender": self.sender_id,
-            "content": content_dict,
-        })
+        result.update(
+            {
+                "type": self.event_type,
+                "room_id": self.room_id,
+                "event_id": self.event_id,
+                "sender": self.sender_id,
+                "content": content_dict,
+            }
+        )
         return result
 
 

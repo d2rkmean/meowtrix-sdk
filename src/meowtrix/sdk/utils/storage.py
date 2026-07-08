@@ -1,11 +1,11 @@
+
 import aiosqlite
-from typing import Optional
 
 
 class SQLiteStorage:
     def __init__(self, db_path: str = "bot_session.db") -> None:
         self.db_path = db_path
-        self._db: Optional[aiosqlite.Connection] = None
+        self._db: aiosqlite.Connection | None = None
 
     async def connect(self) -> None:
         self._db = await aiosqlite.connect(self.db_path)
@@ -99,7 +99,7 @@ class SQLiteStorage:
         )
         await db.commit()
 
-    async def get_megolm_session(self, room_id: str, session_id: str) -> Optional[str]:
+    async def get_megolm_session(self, room_id: str, session_id: str) -> str | None:
         db = self._require_db()
         async with db.execute(
             "SELECT pickle FROM megolm_sessions WHERE room_id = ? AND session_id = ?",
@@ -135,7 +135,7 @@ class SQLiteStorage:
         )
         await db.commit()
 
-    async def get_outbound_session(self, room_id: str) -> Optional[tuple[str, str, int, int]]:
+    async def get_outbound_session(self, room_id: str) -> tuple[str, str, int, int] | None:
         """Возвращает (session_id, pickle, message_count, created_at) либо None."""
         db = self._require_db()
         async with db.execute(
@@ -169,7 +169,6 @@ class SQLiteStorage:
             (sender_key,),
         ) as cursor:
             return await cursor.fetchall()
-
 
     async def close(self) -> None:
         if self._db is not None:

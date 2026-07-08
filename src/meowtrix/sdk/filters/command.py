@@ -1,7 +1,7 @@
 from .base_filter import BaseFilter
 
-class Command(BaseFilter):
 
+class Command(BaseFilter):
     def __init__(self, name: str) -> None:
         self.name = f"!{name}"
 

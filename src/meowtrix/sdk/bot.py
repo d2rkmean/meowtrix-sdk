@@ -3,9 +3,9 @@ from typing import Any
 
 from httpx import AsyncClient
 
+from .types.events import BaseEvent
 from .utils.connection import EndpointType, RequestType, request
 from .utils.storage import SQLiteStorage
-from .types.events import BaseEvent
 
 
 class Bot:

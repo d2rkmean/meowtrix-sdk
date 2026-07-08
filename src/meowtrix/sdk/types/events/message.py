@@ -1,52 +1,51 @@
 from dataclasses import dataclass, field
-from typing import Any, ClassVar, Optional
+from typing import Any, ClassVar
 
-from .base_event import BaseEvent, BaseContent
-
+from .base_event import BaseContent, BaseEvent
 
 
 @dataclass
 class ImageInfo:
-    mimetype: Optional[str] = None
-    size: Optional[int] = None
-    w: Optional[int] = None
-    h: Optional[int] = None
-    thumbnail_url: Optional[str] = None
-    thumbnail_info: Optional[dict[str, Any]] = None
+    mimetype: str | None = None
+    size: int | None = None
+    w: int | None = None
+    h: int | None = None
+    thumbnail_url: str | None = None
+    thumbnail_info: dict[str, Any] | None = None
 
 
 @dataclass
 class FileInfo:
-    mimetype: Optional[str] = None
-    size: Optional[int] = None
-    thumbnail_url: Optional[str] = None
-    thumbnail_info: Optional[dict[str, Any]] = None
+    mimetype: str | None = None
+    size: int | None = None
+    thumbnail_url: str | None = None
+    thumbnail_info: dict[str, Any] | None = None
 
 
 @dataclass
 class AudioInfo:
-    mimetype: Optional[str] = None
-    size: Optional[int] = None
-    duration: Optional[int] = None  
+    mimetype: str | None = None
+    size: int | None = None
+    duration: int | None = None
 
 
 @dataclass
 class VideoInfo:
-    mimetype: Optional[str] = None
-    size: Optional[int] = None
-    w: Optional[int] = None
-    h: Optional[int] = None
-    duration: Optional[int] = None
-    thumbnail_url: Optional[str] = None
-    thumbnail_info: Optional[dict[str, Any]] = None
+    mimetype: str | None = None
+    size: int | None = None
+    w: int | None = None
+    h: int | None = None
+    duration: int | None = None
+    thumbnail_url: str | None = None
+    thumbnail_info: dict[str, Any] | None = None
 
 
 @dataclass
 class TextContent(BaseContent):
     body: str = ""
     msgtype: str = "m.text"
-    format: Optional[str] = None
-    formatted_body: Optional[str] = None
+    format: str | None = None
+    formatted_body: str | None = None
 
 
 @dataclass(kw_only=True)
@@ -68,8 +67,8 @@ class TextMessage(BaseEvent):
 class EmoteContent(BaseContent):
     body: str = ""
     msgtype: str = "m.emote"
-    format: Optional[str] = None
-    formatted_body: Optional[str] = None
+    format: str | None = None
+    formatted_body: str | None = None
 
 
 @dataclass(kw_only=True)
@@ -86,12 +85,13 @@ class EmoteMessage(BaseEvent):
             and data.get("content", {}).get("msgtype") == EmoteMessage.MSGTYPE
         )
 
+
 @dataclass
 class NoticeContent(BaseContent):
     body: str = ""
     msgtype: str = "m.notice"
-    format: Optional[str] = None
-    formatted_body: Optional[str] = None
+    format: str | None = None
+    formatted_body: str | None = None
 
 
 @dataclass(kw_only=True)
@@ -111,12 +111,13 @@ class NoticeMessage(BaseEvent):
 
 # ---------- m.image ----------
 
+
 @dataclass
 class ImageContent(BaseContent):
-    body: str = "" 
-    url: Optional[str] = None 
-    file: Optional[dict[str, Any]] = None 
-    info: Optional[ImageInfo] = None
+    body: str = ""
+    url: str | None = None
+    file: dict[str, Any] | None = None
+    info: ImageInfo | None = None
 
 
 @dataclass(kw_only=True)
@@ -134,15 +135,14 @@ class ImageMessage(BaseEvent):
         )
 
 
-
 @dataclass
 class FileContent(BaseContent):
     body: str = ""
     msgtype: str = "m.file"
-    filename: Optional[str] = None
-    url: Optional[str] = None
-    file: Optional[dict[str, Any]] = None
-    info: Optional[FileInfo] = None
+    filename: str | None = None
+    url: str | None = None
+    file: dict[str, Any] | None = None
+    info: FileInfo | None = None
 
 
 @dataclass(kw_only=True)
@@ -164,9 +164,9 @@ class FileMessage(BaseEvent):
 class AudioContent(BaseContent):
     body: str = ""
     msgtype: str = "m.audio"
-    url: Optional[str] = None
-    file: Optional[dict[str, Any]] = None
-    info: Optional[AudioInfo] = None
+    url: str | None = None
+    file: dict[str, Any] | None = None
+    info: AudioInfo | None = None
 
 
 @dataclass(kw_only=True)
@@ -183,13 +183,14 @@ class AudioMessage(BaseEvent):
             and data.get("content", {}).get("msgtype") == AudioMessage.MSGTYPE
         )
 
+
 @dataclass
 class VideoContent(BaseContent):
     body: str = ""
     msgtype: str = "m.video"
-    url: Optional[str] = None
-    file: Optional[dict[str, Any]] = None
-    info: Optional[VideoInfo] = None
+    url: str | None = None
+    file: dict[str, Any] | None = None
+    info: VideoInfo | None = None
 
 
 @dataclass(kw_only=True)
@@ -197,9 +198,7 @@ class VideoMessage(BaseEvent):
     MSGTYPE: ClassVar[str] = "m.video"
 
     event_type: str = "m.room.message"
-    content: VideoContent = field(
-        default_factory=lambda: VideoContent(msgtype="m.video")
-    )
+    content: VideoContent = field(default_factory=lambda: VideoContent(msgtype="m.video"))
 
     @staticmethod
     def filter(data: dict[str, Any]) -> bool:
@@ -209,13 +208,12 @@ class VideoMessage(BaseEvent):
         )
 
 
-
 @dataclass
 class LocationContent(BaseContent):
     body: str = ""
     msgtype: str = "m.location"
-    geo_uri: Optional[str] = None 
-    info: Optional[dict[str, Any]] = None
+    geo_uri: str | None = None
+    info: dict[str, Any] | None = None
 
 
 @dataclass(kw_only=True)
